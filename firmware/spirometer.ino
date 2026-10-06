@@ -37,9 +37,11 @@
 // ── User configuration ────────────────────────────────────────────────────────
 const char* WIFI_SSID = "YOUR_WIFI_SSID";
 const char* WIFI_PASS = "YOUR_WIFI_PASSWORD";
-const char* API_URL   = "https://YOUR-SITE.netlify.app/api/ingest";
+// Local testing URL (using your computer's Wi-Fi IP on port 8888)
+// Once deployed, change this to: "https://your-site.netlify.app/api/ingest"
+const char* API_URL   = "https://spirometerai.netlify.app/api/ingest";
 const char* DEVICE_ID = "ESP32-SPIRO-01";
-const char* API_KEY   = "YOUR_DEVICE_KEY";   // keep secret
+const char* API_KEY   = "my-super-secret-key-123";   // keep secret
 
 // ── HX711 calibration ─────────────────────────────────────────────────────────
 // Tune these against a 3 L reference syringe (ATS/ERS standard)
