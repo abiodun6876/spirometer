@@ -1,17 +1,15 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
-import { signOut } from "firebase/auth";
-import { auth } from "../firebase";
 import { useTests } from "../hooks/useTests";
 import { useDaily } from "../hooks/useDaily";
 import { StatCard } from "../components/StatCard";
 import { StatusBadge } from "../components/StatusBadge";
 import { TrendChart } from "../components/TrendChart";
 import { InsightList } from "../components/InsightList";
+import { Header } from "../components/Header";
 import { computeStreak, isObstructivePattern, linearRegression, trendDir } from "../lib/analytics";
 import { useDeviceId } from "../context/DeviceContext";
 import { useToast } from "../components/Toast";
-
 
 type Metric = "avgFvc" | "avgFev1" | "avgRatio" | "avgScore";
 
@@ -79,40 +77,7 @@ export function Dashboard() {
 
   return (
     <div style={{ minHeight:"100vh", background:"#0f172a", color:"#f1f5f9", fontFamily:"'Inter',sans-serif" }}>
-      {/* Header */}
-      <header style={{
-        display:"flex", alignItems:"center", justifyContent:"space-between",
-        padding:"16px 32px",
-        borderBottom:"1px solid rgba(255,255,255,0.07)",
-        background:"rgba(15,23,42,0.95)",
-        backdropFilter:"blur(12px)",
-        position:"sticky", top:0, zIndex:100,
-      }}>
-        <div style={{ display:"flex", alignItems:"center", gap:"12px" }}>
-          <span style={{ fontSize:"1.5rem" }}>🫁</span>
-          <span style={{ fontWeight:800, fontSize:"1.1rem", color:"#818cf8" }}>SpiroSense AI</span>
-        </div>
-        <nav style={{ display:"flex", gap:"8px" }}>
-          {[
-            { to:"/",        label:"Dashboard" },
-            { to:"/history", label:"History"   },
-            { to:"/device",  label:"Device"    },
-          ].map(({ to, label }) => (
-            <a key={to} href={to} style={navLink}>{label}</a>
-          ))}
-        </nav>
-        <button
-          id="logout-btn"
-          onClick={() =>
-            signOut(auth).catch(() =>
-              showToast("Sign-out failed. Please try again.", "error")
-            )
-          }
-          style={{ background:"rgba(239,68,68,0.1)", border:"1px solid rgba(239,68,68,0.2)", color:"#fca5a5", borderRadius:"8px", padding:"6px 14px", cursor:"pointer", fontSize:"0.8rem", fontWeight:600 }}
-        >
-          Sign out
-        </button>
-      </header>
+      <Header />
 
       <main style={{ maxWidth:1100, margin:"0 auto", padding:"32px 24px" }}>
         {/* Page title */}
@@ -201,7 +166,3 @@ export function Dashboard() {
   );
 }
 
-const navLink: React.CSSProperties = {
-  color:"#94a3b8", textDecoration:"none", fontWeight:600, fontSize:"0.85rem",
-  padding:"6px 12px", borderRadius:"8px",
-};

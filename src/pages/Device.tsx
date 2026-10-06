@@ -6,6 +6,7 @@ import { db } from "../firebase";
 import { useDevice } from "../hooks/useDevice";
 import { useDeviceId } from "../context/DeviceContext";
 import { useToast } from "../components/Toast";
+import { Header } from "../components/Header";
 
 export function Device() {
   const { deviceId, setDevice } = useDeviceId();
@@ -49,23 +50,7 @@ export function Device() {
 
   return (
     <div style={{ minHeight:"100vh", background:"#0f172a", color:"#f1f5f9", fontFamily:"'Inter',sans-serif" }}>
-      {/* Header */}
-      <header style={{
-        display:"flex", alignItems:"center", justifyContent:"space-between",
-        padding:"16px 32px", borderBottom:"1px solid rgba(255,255,255,0.07)",
-        background:"rgba(15,23,42,0.95)", backdropFilter:"blur(12px)",
-        position:"sticky", top:0, zIndex:100,
-      }}>
-        <div style={{ display:"flex", alignItems:"center", gap:"12px" }}>
-          <span style={{ fontSize:"1.5rem" }}>🫁</span>
-          <span style={{ fontWeight:800, fontSize:"1.1rem", color:"#818cf8" }}>SpiroSense AI</span>
-        </div>
-        <nav style={{ display:"flex", gap:"8px" }}>
-          {[{ to:"/", label:"Dashboard" }, { to:"/history", label:"History" }, { to:"/device", label:"Device" }].map(({ to, label }) => (
-            <a key={to} href={to} style={{ color:"#94a3b8", textDecoration:"none", fontWeight:600, fontSize:"0.85rem", padding:"6px 12px", borderRadius:"8px" }}>{label}</a>
-          ))}
-        </nav>
-      </header>
+      <Header />
 
       <main style={{ maxWidth:800, margin:"0 auto", padding:"32px 24px" }}>
         <h1 style={{ fontSize:"1.6rem", fontWeight:800, margin:"0 0 28px" }}>Device</h1>

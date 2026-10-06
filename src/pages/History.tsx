@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { format } from "date-fns";
 import { useTests } from "../hooks/useTests";
 import { StatusBadge } from "../components/StatusBadge";
+import { Header } from "../components/Header";
 import type { TestStatus } from "../lib/scoring";
 import { useDeviceId } from "../context/DeviceContext";
 import { useToast } from "../components/Toast";
@@ -52,23 +53,7 @@ export function History() {
 
   return (
     <div style={{ minHeight:"100vh", background:"#0f172a", color:"#f1f5f9", fontFamily:"'Inter',sans-serif" }}>
-      {/* Header */}
-      <header style={{
-        display:"flex", alignItems:"center", justifyContent:"space-between",
-        padding:"16px 32px", borderBottom:"1px solid rgba(255,255,255,0.07)",
-        background:"rgba(15,23,42,0.95)", backdropFilter:"blur(12px)",
-        position:"sticky", top:0, zIndex:100,
-      }}>
-        <div style={{ display:"flex", alignItems:"center", gap:"12px" }}>
-          <span style={{ fontSize:"1.5rem" }}>🫁</span>
-          <span style={{ fontWeight:800, fontSize:"1.1rem", color:"#818cf8" }}>SpiroSense AI</span>
-        </div>
-        <nav style={{ display:"flex", gap:"8px" }}>
-          {[{ to:"/", label:"Dashboard" }, { to:"/history", label:"History" }, { to:"/device", label:"Device" }].map(({ to, label }) => (
-            <a key={to} href={to} style={{ color:"#94a3b8", textDecoration:"none", fontWeight:600, fontSize:"0.85rem", padding:"6px 12px", borderRadius:"8px" }}>{label}</a>
-          ))}
-        </nav>
-      </header>
+      <Header />
 
       <main style={{ maxWidth:1100, margin:"0 auto", padding:"32px 24px" }}>
         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:"16px", marginBottom:"24px" }}>
