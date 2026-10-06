@@ -65,18 +65,22 @@ export const handler: Handler = async (event: HandlerEvent) => {
 
   const db = getDb();
 
-  // Fetch last 14 daily summaries sorted by dayKey
-  const dailySnap = await db
-    .collection("devices")
-    .doc(deviceId)
-    .collection("daily")
-    .orderBy("__name__", "desc")
-    .limit(14)
-    .get();
+  // Generate keys for the last 14 days
+  const today = new Date();
+  const refs = Array.from({ length: 14 }).map((_, i) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dk = d.toISOString().slice(0, 10);
+    return db.collection("devices").doc(deviceId).collection("daily").doc(dk);
+  });
 
-  const dailies: DailySummary[] = dailySnap.docs
-    .reverse()
-    .map((d) => d.data() as DailySummary);
+  // Fetch all 14 documents (bypasses any need for an index)
+  const dailySnap = await db.getAll(...refs);
+
+  const dailies: DailySummary[] = dailySnap
+    .filter((snap) => snap.exists)
+    .map((snap) => snap.data() as DailySummary)
+    .reverse(); // Reverse so it's in chronological order (oldest to newest)
 
   const fvcValues   = dailies.map((d) => d.avgFvc);
   const fev1Values  = dailies.map((d) => d.avgFev1);
