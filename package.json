@@ -12,6 +12,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@google-cloud/firestore": "^9.3.1",
     "date-fns": "^4.4.0",
     "firebase": "^12.19.0",
     "react": "^19.2.8",
