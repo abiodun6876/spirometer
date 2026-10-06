@@ -1,0 +1,17 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{db}/documents {
+    match /devices/{deviceId} {
+      allow read: if request.auth != null
+                  && resource.data.ownerUid == request.auth.uid;
+      allow write: if false; // only the Admin SDK writes
+
+      match /{sub=**} {
+        allow read: if request.auth != null
+          && get(/databases/$(db)/documents/devices/$(deviceId)).data.ownerUid
+             == request.auth.uid;
+        allow write: if false;
+      }
+    }
+  }
+}
