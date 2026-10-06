@@ -3,8 +3,9 @@ import { format } from "date-fns";
 import { useTests } from "../hooks/useTests";
 import { StatusBadge } from "../components/StatusBadge";
 import type { TestStatus } from "../lib/scoring";
+import { useDeviceId } from "../context/DeviceContext";
+import { useToast } from "../components/Toast";
 
-const DEVICE_ID = "ESP32-SPIRO-01";
 
 function exportCsv(data: ReturnType<typeof useTests>["tests"]) {
   const header = "Date,Time,FVC (L),FEV1 (L),FEV1/FVC (%),Score,Status";
@@ -27,7 +28,9 @@ function exportCsv(data: ReturnType<typeof useTests>["tests"]) {
 }
 
 export function History() {
-  const { tests, loading } = useTests(DEVICE_ID, 500);
+  const { deviceId } = useDeviceId();
+  const { showToast } = useToast();
+  const { tests, loading } = useTests(deviceId, 500);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo,   setDateTo]   = useState("");
   const [statusFilter, setStatusFilter] = useState<"ALL" | TestStatus>("ALL");
@@ -72,7 +75,10 @@ export function History() {
           <h1 style={{ fontSize:"1.6rem", fontWeight:800, margin:0 }}>Test History</h1>
           <button
             id="export-csv-btn"
-            onClick={() => exportCsv(filtered)}
+            onClick={() => {
+              try { exportCsv(filtered); showToast(`Exported ${filtered.length} records.`, "success"); }
+              catch { showToast("CSV export failed.", "error"); }
+            }}
             style={{ background:"rgba(99,102,241,0.15)", border:"1px solid rgba(99,102,241,0.3)", color:"#818cf8", borderRadius:"10px", padding:"8px 18px", fontWeight:700, cursor:"pointer", fontSize:"0.85rem" }}
           >
             ⬇ Export CSV

@@ -9,14 +9,17 @@ import { StatusBadge } from "../components/StatusBadge";
 import { TrendChart } from "../components/TrendChart";
 import { InsightList } from "../components/InsightList";
 import { computeStreak, isObstructivePattern, linearRegression, trendDir } from "../lib/analytics";
+import { useDeviceId } from "../context/DeviceContext";
+import { useToast } from "../components/Toast";
 
-const DEVICE_ID = "ESP32-SPIRO-01"; // TODO: pull from user profile / Firestore
 
 type Metric = "avgFvc" | "avgFev1" | "avgRatio" | "avgScore";
 
 export function Dashboard() {
-  const { tests, loading: testsLoading }  = useTests(DEVICE_ID);
-  const { daily, loading: dailyLoading }  = useDaily(DEVICE_ID, 30);
+  const { deviceId } = useDeviceId();
+  const { showToast } = useToast();
+  const { tests, loading: testsLoading }  = useTests(deviceId);
+  const { daily, loading: dailyLoading }  = useDaily(deviceId, 30);
   const [insights, setInsights]           = useState<string[]>([]);
   const [disclaimer, setDisclaimer]       = useState<string>("");
   const [insightsLoading, setInsightsLoading] = useState(false);
@@ -38,20 +41,24 @@ export function Dashboard() {
   const ratios   = tests.map((t) => t.ratio);
   const obstFlag = isObstructivePattern(ratios);
 
-  // Fetch server insights on mount
+  // Fetch server insights on mount / when tests change
   useEffect(() => {
     setInsightsLoading(true);
     fetch("/api/insights", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ deviceId: DEVICE_ID }),
+      body: JSON.stringify({ deviceId }),
     })
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
       .then((d) => {
         setInsights(d.insights ?? []);
         setDisclaimer(d.disclaimer ?? "");
       })
       .catch(() => {
+        showToast("Could not reach insights API — showing local analysis.", "warning");
         // Fallback to client-side insights
         const fb: string[] = [];
         if (trend === "up")   fb.push("📈 Your FVC is trending upward over recent days.");
@@ -62,7 +69,7 @@ export function Dashboard() {
         setDisclaimer("These insights are generated locally and are not a medical diagnosis.");
       })
       .finally(() => setInsightsLoading(false));
-  }, [tests.length]);
+  }, [tests.length, deviceId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const trendEmoji = { up: "📈", down: "📉", stable: "➡️" }[trend];
   const metricTabs: Metric[] = ["avgFvc", "avgFev1", "avgRatio", "avgScore"];
@@ -96,7 +103,11 @@ export function Dashboard() {
         </nav>
         <button
           id="logout-btn"
-          onClick={() => signOut(auth)}
+          onClick={() =>
+            signOut(auth).catch(() =>
+              showToast("Sign-out failed. Please try again.", "error")
+            )
+          }
           style={{ background:"rgba(239,68,68,0.1)", border:"1px solid rgba(239,68,68,0.2)", color:"#fca5a5", borderRadius:"8px", padding:"6px 14px", cursor:"pointer", fontSize:"0.8rem", fontWeight:600 }}
         >
           Sign out
