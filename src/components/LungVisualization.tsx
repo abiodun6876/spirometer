@@ -18,7 +18,7 @@ export function LungVisualization({ fvc, fev1 }: LungVisualizationProps) {
 
   useEffect(() => {
     // Animation loop: Inhale (2s) -> Hold (0.5s) -> Exhale (dynamic) -> Rest (2s)
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     const playSequence = () => {
       setPhase("inhale");
