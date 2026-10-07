@@ -1,15 +1,19 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{db}/documents {
+    // Users can read/write their own user profile
+    match /users/{userId} {
+      allow read, write: if request.auth != null
+                         && request.auth.uid == userId;
+    }
+
+    // Any authenticated user can read device data
     match /devices/{deviceId} {
-      allow read: if request.auth != null
-                  && resource.data.ownerUid == request.auth.uid;
+      allow read: if request.auth != null;
       allow write: if false; // only the Admin SDK writes
 
       match /{sub=**} {
-        allow read: if request.auth != null
-          && get(/databases/$(db)/documents/devices/$(deviceId)).data.ownerUid
-             == request.auth.uid;
+        allow read: if request.auth != null;
         allow write: if false;
       }
     }
