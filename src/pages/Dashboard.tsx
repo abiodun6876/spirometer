@@ -6,8 +6,8 @@ import { StatCard } from "../components/StatCard";
 import { StatusBadge } from "../components/StatusBadge";
 import { TrendChart } from "../components/TrendChart";
 import { InsightList } from "../components/InsightList";
+import { AirflowSimulation } from "../components/AirflowSimulation";
 import { PredictiveInsights } from "../components/PredictiveInsights";
-import { LungVisualization } from "../components/LungVisualization";
 import { Header } from "../components/Header";
 import { computeStreak, isObstructivePattern, linearRegression, trendDir } from "../lib/analytics";
 import { useDeviceId } from "../context/DeviceContext";
@@ -163,7 +163,7 @@ export function Dashboard() {
             </div>
 
             {/* Virtual Reality / Visualization of Hardware Flow */}
-            <LungVisualization fvc={latest.fvc} fev1={latest.fev1} />
+            <AirflowSimulation fvc={latest?.fvc} fev1={latest?.fev1} />
 
             {/* TensorFlow.js Prediction */}
             <PredictiveInsights />
