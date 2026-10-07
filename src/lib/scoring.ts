@@ -3,7 +3,7 @@
 
 const clamp = (n: number) => Math.min(1, Math.max(0, n));
 
-export type TestStatus = "GOOD" | "OK" | "POOR";
+export type TestStatus = "Normal" | "Restrictive" | "Obstructive";
 
 export interface ScoreResult {
   ratio: number;
@@ -13,9 +13,9 @@ export interface ScoreResult {
 
 export function scoreTest(fvc: number, fev1: number): ScoreResult {
   const ratio = (fev1 / fvc) * 100;
-  let status: TestStatus = "POOR";
-  if (ratio >= 75 && fvc >= 3.5) status = "GOOD";
-  else if (ratio >= 65 && fvc >= 2.5) status = "OK";
+  let status: TestStatus = "Obstructive";
+  if (ratio >= 75 && fvc >= 3.5) status = "Normal";
+  else if (ratio >= 65 && fvc >= 2.5) status = "Restrictive";
 
   const score = Math.round(
     (clamp((ratio - 50) / 30) * 0.6 + clamp((fvc - 1.5) / 2.5) * 0.4) * 100
@@ -25,8 +25,8 @@ export function scoreTest(fvc: number, fev1: number): ScoreResult {
 
 export function statusColor(status: TestStatus): string {
   switch (status) {
-    case "GOOD": return "#22c55e";
-    case "OK":   return "#f59e0b";
-    case "POOR": return "#ef4444";
+    case "Normal": return "#22c55e";
+    case "Restrictive":   return "#f59e0b";
+    case "Obstructive": return "#ef4444";
   }
 }

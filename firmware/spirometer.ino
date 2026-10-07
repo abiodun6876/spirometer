@@ -6,7 +6,7 @@
  * Features:
  *  • Auto-starts test when flow exceeds 0.20 L/s
  *  • Integrates flow into FVC, tracks FEV1 (first-second volume) and peakFlow
- *  • Classifies result (GOOD / OK / POOR) and displays on OLED + RGB LED
+ *  • Classifies result (Normal / Restrictive / Obstructive) and displays on OLED + RGB LED
  *  • Uploads result via HTTPS POST to the Netlify ingest function
  *  • Offline retry: stores last failed result in NVS flash (Preferences)
  *
@@ -169,7 +169,7 @@ void evaluateResults(float fvc, float fev1) {
     setLed(false, true, false);       // green
     oled.clearDisplay();
     oled.setTextSize(2); oled.setTextColor(SSD1306_WHITE);
-    oled.setCursor(20, 0); oled.println("GOOD");
+    oled.setCursor(28, 0); oled.println("Normal");
     oled.setTextSize(1);
     oled.setCursor(0, 24); oled.println(l1);
     oled.setCursor(0, 36); oled.println(l2);
@@ -177,18 +177,16 @@ void evaluateResults(float fvc, float fev1) {
   } else if (ratio >= 65 && fvc >= 2.5f) {
     setLed(true, true, false);        // yellow
     oled.clearDisplay();
-    oled.setTextSize(2); oled.setTextColor(SSD1306_WHITE);
-    oled.setCursor(30, 0); oled.println("OK");
-    oled.setTextSize(1);
+    oled.setTextSize(1); oled.setTextColor(SSD1306_WHITE); // Use size 1 to fit "Restrictive"
+    oled.setCursor(30, 0); oled.println("RESTRICTIVE");
     oled.setCursor(0, 24); oled.println(l1);
     oled.setCursor(0, 36); oled.println(l2);
     oled.setCursor(0, 48); oled.println(l3);
   } else {
     setLed(true, false, false);       // red
     oled.clearDisplay();
-    oled.setTextSize(2); oled.setTextColor(SSD1306_WHITE);
-    oled.setCursor(14, 0); oled.println("POOR");
-    oled.setTextSize(1);
+    oled.setTextSize(1); oled.setTextColor(SSD1306_WHITE); // Use size 1 to fit "Obstructive"
+    oled.setCursor(30, 0); oled.println("OBSTRUCTIVE");
     oled.setCursor(0, 24); oled.println(l1);
     oled.setCursor(0, 36); oled.println(l2);
     oled.setCursor(0, 48); oled.println(l3);

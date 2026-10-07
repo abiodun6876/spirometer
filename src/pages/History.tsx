@@ -89,9 +89,9 @@ export function History() {
               style={{ ...inputStyle, cursor:"pointer" }}
             >
               <option value="ALL">All</option>
-              <option value="GOOD">GOOD</option>
-              <option value="OK">OK</option>
-              <option value="POOR">POOR</option>
+              <option value="Normal">Normal</option>
+              <option value="Restrictive">Restrictive</option>
+              <option value="Obstructive">Obstructive</option>
             </select>
           </div>
           <div style={{ alignSelf:"flex-end", fontSize:"0.8rem", color:"#64748b", paddingBottom:"2px" }}>
