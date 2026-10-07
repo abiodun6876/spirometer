@@ -7,6 +7,7 @@ import { StatusBadge } from "../components/StatusBadge";
 import { TrendChart } from "../components/TrendChart";
 import { InsightList } from "../components/InsightList";
 import { PredictiveInsights } from "../components/PredictiveInsights";
+import { LungVisualization } from "../components/LungVisualization";
 import { Header } from "../components/Header";
 import { computeStreak, isObstructivePattern, linearRegression, trendDir } from "../lib/analytics";
 import { useDeviceId } from "../context/DeviceContext";
@@ -160,6 +161,9 @@ export function Dashboard() {
               <h2 style={{ fontSize:"1rem", fontWeight:700, margin:"0 0 16px" }}>✨ AI Insights</h2>
               <InsightList insights={insights} disclaimer={disclaimer} loading={insightsLoading} />
             </div>
+
+            {/* Virtual Reality / Visualization of Hardware Flow */}
+            <LungVisualization fvc={latest.fvc} fev1={latest.fev1} />
 
             {/* TensorFlow.js Prediction */}
             <PredictiveInsights />
