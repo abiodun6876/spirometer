@@ -13,9 +13,14 @@ export interface ScoreResult {
 
 export function scoreTest(fvc: number, fev1: number): ScoreResult {
   const ratio = (fev1 / fvc) * 100;
-  let status: TestStatus = "Obstructive";
-  if (ratio >= 75 && fvc >= 3.5) status = "Normal";
-  else if (ratio >= 65 && fvc >= 2.5) status = "Restrictive";
+  let status: TestStatus;
+  if (ratio < 70) {
+    status = "Obstructive";
+  } else if (fvc < 3.5) {
+    status = "Restrictive";
+  } else {
+    status = "Normal";
+  }
 
   const score = Math.round(
     (clamp((ratio - 50) / 30) * 0.6 + clamp((fvc - 1.5) / 2.5) * 0.4) * 100

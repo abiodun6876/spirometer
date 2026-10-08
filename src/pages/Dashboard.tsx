@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { format } from "date-fns";
 import { useTests } from "../hooks/useTests";
 import { useDaily } from "../hooks/useDaily";
@@ -29,11 +29,30 @@ export function Dashboard() {
   const today  = format(new Date(), "yyyy-MM-dd");
   const todayData = daily.find((d) => d.dayKey === today);
 
+  // Trend data: daily aggregates if 2+ days exist, or recent tests chronologically
+  const trendInfo = useMemo(() => {
+    if (daily.length >= 2) {
+      return { data: daily.slice(-14), title: "14-Day Trend", sub: "Daily averages" };
+    }
+    if (tests.length >= 2) {
+      const recent = tests.slice(0, 14).reverse().map((t) => ({
+        dayKey: format(t.recordedAt, "d MMM HH:mm"),
+        avgFvc: t.fvc,
+        avgFev1: t.fev1,
+        avgRatio: t.ratio,
+        avgScore: t.score,
+        tests: 1,
+      }));
+      return { data: recent, title: "Recent Tests Trend", sub: "Last 14 sessions" };
+    }
+    return { data: [], title: "Trend Chart", sub: "" };
+  }, [daily, tests]);
+
   // Streak
   const streak = computeStreak(tests.map((t) => t.dayKey));
 
   // Trend tag
-  const fvcValues  = daily.map((d) => d.avgFvc);
+  const fvcValues  = trendInfo.data.map((d) => d.avgFvc);
   const { slope }  = linearRegression(fvcValues);
   const trend      = trendDir(slope);
 
@@ -129,7 +148,12 @@ export function Dashboard() {
             {/* Trend chart */}
             <div style={{ background:"rgba(255,255,255,0.03)", border:"1px solid rgba(255,255,255,0.07)", borderRadius:"16px", padding:"24px", marginBottom:"28px" }}>
               <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:"16px", flexWrap:"wrap", gap:"10px" }}>
-                <h2 style={{ fontSize:"1rem", fontWeight:700, margin:0 }}>14-Day Trend</h2>
+                <div>
+                  <h2 style={{ fontSize:"1rem", fontWeight:700, margin:0 }}>{trendInfo.title}</h2>
+                  {trendInfo.sub && (
+                    <span style={{ fontSize:"0.72rem", color:"#64748b", fontWeight:500 }}>{trendInfo.sub}</span>
+                  )}
+                </div>
                 <div style={{ display:"flex", gap:"6px" }}>
                   {metricTabs.map((m) => (
                     <button
@@ -145,14 +169,14 @@ export function Dashboard() {
                   ))}
                 </div>
               </div>
-              {dailyLoading ? (
+              {(dailyLoading && testsLoading) ? (
                 <div style={{ color:"#64748b", textAlign:"center", padding:"40px" }}>Loading chart…</div>
-              ) : daily.length < 2 ? (
+              ) : trendInfo.data.length < 2 ? (
                 <div style={{ color:"#64748b", textAlign:"center", padding:"40px", fontSize:"0.85rem" }}>
                   Not enough data yet — complete more tests to see the trend chart.
                 </div>
               ) : (
-                <TrendChart data={daily.slice(-14)} metric={metric} />
+                <TrendChart data={trendInfo.data} metric={metric} />
               )}
             </div>
 

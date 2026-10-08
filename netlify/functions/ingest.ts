@@ -17,9 +17,14 @@ const clamp = (n: number) => Math.min(1, Math.max(0, n));
 
 function scoreTest(fvc: number, fev1: number) {
   const ratio = (fev1 / fvc) * 100;
-  let status: "Normal" | "Restrictive" | "Obstructive" = "Obstructive";
-  if (ratio >= 75 && fvc >= 3.5) status = "Normal";
-  else if (ratio >= 65 && fvc >= 2.5) status = "Restrictive";
+  let status: "Normal" | "Restrictive" | "Obstructive";
+  if (ratio < 70) {
+    status = "Obstructive";
+  } else if (fvc < 3.5) {
+    status = "Restrictive";
+  } else {
+    status = "Normal";
+  }
 
   const score = Math.round(
     (clamp((ratio - 50) / 30) * 0.6 + clamp((fvc - 1.5) / 2.5) * 0.4) * 100

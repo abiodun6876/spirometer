@@ -165,28 +165,28 @@ void evaluateResults(float fvc, float fev1) {
   snprintf(l2, sizeof(l2), "FEV1: %.2f L", fev1);
   snprintf(l3, sizeof(l3), "Ratio:%.1f%%", ratio);
 
-  if (ratio >= 75 && fvc >= 3.5f) {
-    setLed(false, true, false);       // green
+  if (ratio < 70.0f) {
+    setLed(true, false, false);       // red = Obstructive
     oled.clearDisplay();
-    oled.setTextSize(2); oled.setTextColor(SSD1306_WHITE);
-    oled.setCursor(28, 0); oled.println("Normal");
-    oled.setTextSize(1);
+    oled.setTextSize(1); oled.setTextColor(SSD1306_WHITE);
+    oled.setCursor(26, 0); oled.println("OBSTRUCTIVE");
     oled.setCursor(0, 24); oled.println(l1);
     oled.setCursor(0, 36); oled.println(l2);
     oled.setCursor(0, 48); oled.println(l3);
-  } else if (ratio >= 65 && fvc >= 2.5f) {
-    setLed(true, true, false);        // yellow
+  } else if (fvc < 3.5f) {
+    setLed(true, true, false);        // yellow = Restrictive
     oled.clearDisplay();
-    oled.setTextSize(1); oled.setTextColor(SSD1306_WHITE); // Use size 1 to fit "Restrictive"
-    oled.setCursor(30, 0); oled.println("RESTRICTIVE");
+    oled.setTextSize(1); oled.setTextColor(SSD1306_WHITE);
+    oled.setCursor(26, 0); oled.println("RESTRICTIVE");
     oled.setCursor(0, 24); oled.println(l1);
     oled.setCursor(0, 36); oled.println(l2);
     oled.setCursor(0, 48); oled.println(l3);
   } else {
-    setLed(true, false, false);       // red
+    setLed(false, true, false);       // green = Normal
     oled.clearDisplay();
-    oled.setTextSize(1); oled.setTextColor(SSD1306_WHITE); // Use size 1 to fit "Obstructive"
-    oled.setCursor(30, 0); oled.println("OBSTRUCTIVE");
+    oled.setTextSize(2); oled.setTextColor(SSD1306_WHITE);
+    oled.setCursor(28, 0); oled.println("NORMAL");
+    oled.setTextSize(1);
     oled.setCursor(0, 24); oled.println(l1);
     oled.setCursor(0, 36); oled.println(l2);
     oled.setCursor(0, 48); oled.println(l3);

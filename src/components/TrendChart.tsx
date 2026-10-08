@@ -61,11 +61,11 @@ export function TrendChart({ data, metric = "avgFvc" }: TrendChartProps) {
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={chartData} margin={{ top: 10, right: 20, left: -10, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-          <XAxis
-            dataKey="dayKey"
-            tick={{ fontSize: 11, fill: "#64748b" }}
-            tickFormatter={(v) => v.slice(5)} // show MM-DD
-          />
+            <XAxis
+              dataKey="dayKey"
+              tick={{ fontSize: 11, fill: "#64748b" }}
+              tickFormatter={(v: string) => (v && v.includes("-") && v.length === 10 ? v.slice(5) : v)}
+            />
           <YAxis tick={{ fontSize: 11, fill: "#64748b" }} />
           <Tooltip content={<CustomTooltip />} />
           <Legend wrapperStyle={{ fontSize: "0.78rem", color: "#94a3b8" }} />
