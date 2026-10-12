@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { format } from "date-fns";
 import { useTests } from "../hooks/useTests";
+import { usePatient } from "../hooks/usePatient";
 import { StatusBadge } from "../components/StatusBadge";
 import { Header } from "../components/Header";
 import type { TestStatus } from "../lib/scoring";
@@ -8,10 +9,11 @@ import { useDeviceId } from "../context/DeviceContext";
 import { useToast } from "../components/Toast";
 
 
-function exportCsv(data: ReturnType<typeof useTests>["tests"]) {
-  const header = "Date,Time,FVC (L),FEV1 (L),FEV1/FVC (%),Score,Status";
+function exportCsv(data: ReturnType<typeof useTests>["tests"], patientName: string) {
+  const header = "Patient,Date,Time,FVC (L),FEV1 (L),FEV1/FVC (%),Score,Status";
   const rows = data.map((t) =>
     [
+      `"${patientName}"`,
       format(t.recordedAt, "yyyy-MM-dd"),
       format(t.recordedAt, "HH:mm:ss"),
       t.fvc.toFixed(3),
@@ -32,6 +34,7 @@ export function History() {
   const { deviceId } = useDeviceId();
   const { showToast } = useToast();
   const { tests, loading } = useTests(deviceId, 500);
+  const { patient, hasProfile } = usePatient(deviceId);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo,   setDateTo]   = useState("");
   const [statusFilter, setStatusFilter] = useState<"ALL" | TestStatus>("ALL");
@@ -57,11 +60,21 @@ export function History() {
 
       <main style={{ maxWidth:1100, margin:"0 auto", padding:"32px 24px" }}>
         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:"16px", marginBottom:"24px" }}>
-          <h1 style={{ fontSize:"1.6rem", fontWeight:800, margin:0 }}>Test History</h1>
+          <div>
+            <h1 style={{ fontSize:"1.6rem", fontWeight:800, margin:0 }}>Test History</h1>
+            {hasProfile && (
+              <p style={{ margin:"4px 0 0", fontSize:"0.82rem", color:"#94a3b8" }}>
+                Patient: <strong style={{ color:"#e2e8f0" }}>{patient.name}</strong>
+                {patient.age > 0 && <> · {patient.age}y</>}
+                {patient.heightCm > 0 && <> · {patient.heightCm}cm</>}
+                {patient.gender && <> · {patient.gender.charAt(0).toUpperCase() + patient.gender.slice(1)}</>}
+              </p>
+            )}
+          </div>
           <button
             id="export-csv-btn"
             onClick={() => {
-              try { exportCsv(filtered); showToast(`Exported ${filtered.length} records.`, "success"); }
+              try { exportCsv(filtered, patient.name || "Unknown"); showToast(`Exported ${filtered.length} records.`, "success"); }
               catch { showToast("CSV export failed.", "error"); }
             }}
             style={{ background:"rgba(99,102,241,0.15)", border:"1px solid rgba(99,102,241,0.3)", color:"#818cf8", borderRadius:"10px", padding:"8px 18px", fontWeight:700, cursor:"pointer", fontSize:"0.85rem" }}

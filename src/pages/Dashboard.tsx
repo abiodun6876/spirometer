@@ -2,12 +2,14 @@ import { useState, useEffect, useMemo } from "react";
 import { format } from "date-fns";
 import { useTests } from "../hooks/useTests";
 import { useDaily } from "../hooks/useDaily";
+import { usePatient } from "../hooks/usePatient";
 import { StatCard } from "../components/StatCard";
 import { StatusBadge } from "../components/StatusBadge";
 import { TrendChart } from "../components/TrendChart";
 import { InsightList } from "../components/InsightList";
 import { AirflowSimulation } from "../components/AirflowSimulation";
 import { PredictiveInsights } from "../components/PredictiveInsights";
+import { PatientForm } from "../components/PatientForm";
 import { Header } from "../components/Header";
 import { computeStreak, isObstructivePattern, linearRegression, trendDir } from "../lib/analytics";
 import { useDeviceId } from "../context/DeviceContext";
@@ -20,6 +22,7 @@ export function Dashboard() {
   const { showToast } = useToast();
   const { tests, loading: testsLoading }  = useTests(deviceId);
   const { daily, loading: dailyLoading }  = useDaily(deviceId, 30);
+  const { patient, saving: patientSaving, savePatient, hasProfile, loading: patientLoading } = usePatient(deviceId);
   const [insights, setInsights]           = useState<string[]>([]);
   const [disclaimer, setDisclaimer]       = useState<string>("");
   const [insightsLoading, setInsightsLoading] = useState(false);
@@ -103,13 +106,21 @@ export function Dashboard() {
       <main style={{ maxWidth:1100, margin:"0 auto", padding:"32px 24px" }}>
         {/* Page title */}
         <div style={{ marginBottom:"28px" }}>
-          <h1 style={{ fontSize:"1.6rem", fontWeight:800, margin:0 }}>Dashboard</h1>
+          <h1 style={{ fontSize:"1.6rem", fontWeight:800, margin:0 }}>
+            Dashboard
+            {hasProfile && <span style={{ fontSize:"0.85rem", fontWeight:500, color:"#94a3b8", marginLeft:"12px" }}>— {patient.name}</span>}
+          </h1>
           <p style={{ color:"#64748b", fontSize:"0.82rem", margin:"4px 0 0" }}>
             {format(new Date(), "EEEE, d MMMM yyyy")}
           </p>
         </div>
 
-        {testsLoading ? (
+        {/* Patient Profile — always show at top */}
+        {!patientLoading && (
+          <PatientForm patient={patient} saving={patientSaving} onSave={savePatient} />
+        )}
+
+        {(testsLoading || patientLoading) ? (
           <div style={{ color:"#64748b", padding:"40px", textAlign:"center" }}>Loading data…</div>
         ) : (
           <>
