@@ -99,6 +99,13 @@ export const handler: Handler = async (event: HandlerEvent) => {
   const now = new Date();
   const dk = dayKey(now);
 
+  const deviceData = deviceSnap.data() ?? {};
+  // Patient ID can come from incoming payload or default to currently assigned active device patient
+  const targetPatientId = (typeof (body as any).patientId === "string" && (body as any).patientId.trim())
+    ? (body as any).patientId.trim()
+    : (deviceData.activePatientId ?? deviceData.patientId ?? null);
+  const targetPatientName = deviceData.patientName ?? null;
+
   // ── Write test document ───────────────────────────────────────────────────
   const testRef = deviceRef.collection("tests").doc();
   const batch = db.batch();
@@ -112,7 +119,29 @@ export const handler: Handler = async (event: HandlerEvent) => {
     score,
     recordedAt: Timestamp.fromDate(now),
     dayKey: dk,
+    patientId: targetPatientId,
+    patientName: targetPatientName,
   });
+
+  // ── Upsert patient summary if patientId exists ─────────────────────────────
+  if (targetPatientId) {
+    const patientRef = db.collection("patients").doc(targetPatientId);
+    batch.set(
+      patientRef,
+      {
+        id: targetPatientId,
+        totalTests: FieldValue.increment(1),
+        lastTestAt: Timestamp.fromDate(now),
+        lastFvc: fvc,
+        lastFev1: fev1,
+        lastRatio: ratio,
+        lastStatus: status,
+        lastScore: score,
+        updatedAt: Timestamp.fromDate(now),
+      },
+      { merge: true }
+    );
+  }
 
   // ── Upsert daily summary ──────────────────────────────────────────────────
   const dailyRef = deviceRef.collection("daily").doc(dk);
@@ -146,6 +175,14 @@ export const handler: Handler = async (event: HandlerEvent) => {
   return {
     statusCode: 201,
     headers: { ...cors, "Content-Type": "application/json" },
-    body: JSON.stringify({ ok: true, id: testRef.id, ratio, status, score }),
+    body: JSON.stringify({
+      ok: true,
+      id: testRef.id,
+      ratio,
+      status,
+      score,
+      patientId: targetPatientId,
+      patientName: targetPatientName,
+    }),
   };
 };

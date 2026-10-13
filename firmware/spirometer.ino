@@ -74,6 +74,7 @@ Preferences         prefs;
 
 float  gFvc = 0, gFev1 = 0, gPeak = 0;
 bool   gTestDone = false;
+char   gPatientId[32] = "";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 void setLed(bool r, bool g, bool b) {
@@ -123,6 +124,21 @@ bool postResult(float fvc, float fev1, float peak) {
     DEVICE_ID, fvc, fev1, peak);
 
   int code = http.POST(body);
+  if (code == 201) {
+    String payload = http.getString();
+    // Parse "patientId":"PAT-xxxx" from response
+    int idx = payload.indexOf("\"patientId\":\"");
+    if (idx != -1) {
+      int start = idx + 13;
+      int end = payload.indexOf("\"", start);
+      if (end != -1 && (end - start) < (int)sizeof(gPatientId)) {
+        String pid = payload.substring(start, end);
+        pid.toCharArray(gPatientId, sizeof(gPatientId));
+        Serial.print("[SpiroSense] Assigned to Patient ID: ");
+        Serial.println(gPatientId);
+      }
+    }
+  }
   http.end();
   return code == 201;
 }
@@ -259,7 +275,13 @@ void runSpirometryTest() {
   oledMsg("Uploading…");
   bool ok = postResult(fvc, fev1, peakFlow);
   if (ok) {
-    oledMsg("Upload OK!", "Result saved");
+    if (strlen(gPatientId) > 0) {
+      char msg[32];
+      snprintf(msg, sizeof(msg), "ID: %s", gPatientId);
+      oledMsg("Upload OK!", msg, "Saved to Cloud");
+    } else {
+      oledMsg("Upload OK!", "Saved to Cloud");
+    }
   } else {
     storeRetry(fvc, fev1, peakFlow);
     oledMsg("UPLOAD FAILED", "Saved locally", "Will retry next boot");
